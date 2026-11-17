@@ -1,0 +1,83 @@
+name: Task Checklist
+on: [push, workflow_dispatch, repository_dispatch]
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: chmod +x scripts/*.sh
+
+      - name: Task 1 Hello
+        id: hello
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Task 1 Hello
+          command: ./scripts/check-hello.sh
+          timeout: 1
+          max-score: 1
+
+      - name: Task 2 Book
+        id: book
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Task 2 Book
+          command: ./scripts/run-test.sh BookTest Book
+          timeout: 2
+          max-score: 1
+
+      - name: Task 3 Product
+        id: product
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Task 3 Product
+          command: ./scripts/run-test.sh ProductTest Product
+          timeout: 2
+          max-score: 1
+
+      - name: Task 4 Constructors
+        id: constructors
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Task 4 Constructors
+          command: ./scripts/run-test.sh ConstructorTest Book Product
+          timeout: 2
+          max-score: 1
+
+      - name: Task 5 Shop
+        id: shop
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Task 5 Shop
+          command: ./scripts/run-test.sh ShopTest Product Shop
+          timeout: 2
+          max-score: 1
+
+      - name: Task 6 Main
+        id: main
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Task 6 Main
+          command: ./scripts/check-main.sh
+          timeout: 2
+          max-score: 1
+
+      - name: Checklist Reporter
+        uses: classroom-resources/autograding-grading-reporter@v1
+        env:
+          HELLO_RESULTS: "${{steps.hello.outputs.result}}"
+          BOOK_RESULTS: "${{steps.book.outputs.result}}"
+          PRODUCT_RESULTS: "${{steps.product.outputs.result}}"
+          CONSTRUCTORS_RESULTS: "${{steps.constructors.outputs.result}}"
+          SHOP_RESULTS: "${{steps.shop.outputs.result}}"
+          MAIN_RESULTS: "${{steps.main.outputs.result}}"
+        with:
+          runners: hello,book,product,constructors,shop,main
