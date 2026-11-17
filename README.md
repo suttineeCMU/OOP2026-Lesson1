@@ -158,18 +158,72 @@ Add 3 constructors to each class.
 
 ### Task 5 — Shop with an array of Products (`src/Shop.java`)
 
-- Fields: `String name`; `Product[] items`; `int count`
-- `Shop(String name)` → `this.name = name`, `items = new Product[5]`, `count = 0`
-- `boolean addProduct(Product p)` → put `p` at `items[count]`, `count++`, return `true`. Return `false` when the shop is full.
-- `double totalStockValue()` → the sum of `totalValue()` of the first `count` items
-- `Product findByCode(String code)` → compare with `.equals()`. Return `null` if not found.
-- `void printAll()` → call `printInfo()` on each item. Loop only to `count` (no `NullPointerException`).
-- `void printSummary()` → prints exactly two lines:
+A `Shop` keeps up to **5** `Product` objects in an **array**. Open `src/Shop.java`: each TODO has a hint with blanks (`___`). Write your code below each TODO.
 
-  ```
-  Shop: <name> (<count> products)
-  Total stock value: <value> THB
-  ```
+After each step, run `./scripts/run-test.sh ShopTest Product Shop` and read the `[x]` / `[ ]` lines.
+
+#### The big idea: `items` and `count`
+
+The array always has 5 slots, but at first they are empty (`null`). `count` says how many slots are used. Here is the shop after adding 3 products:
+
+```
+index:   [0]        [1]     [2]     [3]    [4]
+items:   Notebook   Pen     Bag     null   null
+count = 3   → the next product goes into items[3]
+```
+
+So:
+
+- **Add** a product: put it at `items[count]`, then `count++`.
+- **Loop** over products: `for (int i = 0; i < count; i++)`. Use `count`, **not** `items.length`. `items[3]` is `null`, so `items[3].printInfo()` crashes with a `NullPointerException`.
+
+#### Step by step
+
+**Step 1 — Fields.**
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `name` | `String` | the shop's name, e.g. `"Campus Store"` |
+| `items` | `Product[]` | an array of Product objects |
+| `count` | `int` | how many products are in the array now |
+
+**Step 2 — Constructor `Shop(String name)`.** Set `this.name = name`, create the array with `items = new Product[5]`, and set `count = 0`.
+
+**Step 3 — `boolean addProduct(Product p)`.**
+
+- If the shop is full (`count == items.length`), return `false` and add nothing.
+- If not, put `p` at `items[count]`, do `count++`, and return `true`.
+
+The 6th call to `addProduct` must return `false`, and `count` stays `5`.
+
+**Step 4 — `double totalStockValue()`.** Start with `double sum = 0`. Loop over the first `count` items and add `items[i].totalValue()` to `sum`. Return `sum`.
+An empty shop returns `0.0`. Campus Store returns `59.5×20 + 15.0×50 + 250.0×2 = 1190 + 750 + 500 = 2440.0`.
+
+**Step 5 — `Product findByCode(String code)`.** Loop over the first `count` items. If `items[i].code.equals(code)`, return `items[i]`. After the loop (nothing found), return `null`.
+
+> **Why `.equals()` and not `==`?** For Strings, `==` checks whether two variables point to the same object, not whether the text is the same. Two different `"P002"` objects can be `==`-false. `.equals()` compares the text.
+
+**Step 6 — `void printAll()`.** Loop over the first `count` items and call `items[i].printInfo()`. For a shop with 2 products it prints:
+
+```
+P001 Notebook - 59.5 THB (stock: 20)
+P002 Pen - 15.0 THB (stock: 50)
+```
+
+**Step 7 — `void printSummary()`.** Print exactly two lines. Use the fields `name` and `count`, and call your own `totalStockValue()`:
+
+```
+Shop: Campus Store (3 products)
+Total stock value: 2440.0 THB
+```
+
+#### Common mistakes
+
+- Looping to `items.length` instead of `count`: `NullPointerException`.
+- Forgetting `count++` in `addProduct`: every product goes into `items[0]`.
+- Forgetting `items = new Product[5]` in the constructor: `items` is `null`.
+- Comparing codes with `==`: `findByCode` returns `null` even when the product is there.
+- `return null` *inside* the loop in `findByCode`: only the first product is checked.
 
 **DONE when** all 6 checks pass (the constructor + 5 methods).
 
